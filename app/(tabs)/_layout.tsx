@@ -7,15 +7,16 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#ffd33d',
-    headerStyle: {
+        tabBarActiveTintColor: '#fff',
+        headerStyle: {
+          backgroundColor: '#25292e',
+        },
+      headerShadowVisible: false,
+      headerTintColor: '#fff',
+      tabBarStyle: {
       backgroundColor: '#25292e',
     },
-    headerShadowVisible: false,
-    headerTintColor: '#fff',
-    tabBarStyle: {
-    backgroundColor: '#25292e',
-    },
+    animation:'fade',
       }}
     >
       <Tabs.Screen
@@ -39,7 +40,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="compradores"
         options={{
-          title: 'Registro de Compradores',
+          title: 'Registro',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'person-sharp' : 'person-outline'} color={color} size={24} />
           ),

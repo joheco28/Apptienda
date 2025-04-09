@@ -1,9 +1,211 @@
-import { Text, View, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Image, Alert, Keyboard, TouchableOpacity, ScrollView } from 'react-native';
+import { CameraView, useCameraPermissions, BarcodeScanningResult, CameraType } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 
-export default function InventarioScreen() {
+export default function InventarioForm() {
+  // Estados para la cámara y permisos
+  const [facing, setFacing] = useState<CameraType>(ImagePicker.CameraType.back);
+  const [scanned, setScanned] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
+
+  // Estados del formulario
+  const [form, setForm] = useState({
+    codigo: '',
+    nombre: '',
+    imagen: null as string | null,
+    cantidad: '',
+    valorUnitario: ''
+  });
+
+  // Solicitar permisos al iniciar
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso necesario', 'Necesitamos acceso a la galería para seleccionar imágenes');
+      }
+    })();
+  }, []);
+
+  // Manejar escaneo de código
+  const handleBarCodeScanned = ({ data }: BarcodeScanningResult) => {
+    setScanned(true);
+    setShowScanner(false);
+    setForm({...form, codigo: data});
+    Alert.alert('Código escaneado', `Valor: ${data}`);
+  };
+
+  // Seleccionar imagen de galería
+  const pickImage = async () => {
+    Keyboard.dismiss();
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets[0]?.uri) {
+      setForm({...form, imagen: result.assets[0].uri});
+    }
+  };
+
+  // Tomar foto con cámara
+  const takePhoto = async () => {
+    Keyboard.dismiss();
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets[0]?.uri) {
+      setForm({...form, imagen: result.assets[0].uri});
+    }
+  };
+
+  // Manejar cambios en inputs
+  const handleChange = (name: string, value: string) => {
+    if ((name === 'cantidad' || name === 'valorUnitario') && value !== '' && isNaN(Number(value))) {
+      return;
+    }
+    setForm({...form, [name]: value});
+  };
+
+  // Enviar formulario
+  const handleSubmit = () => {
+    if (!form.codigo || !form.nombre || !form.cantidad || !form.valorUnitario) {
+      Alert.alert('Error', 'Por favor complete todos los campos obligatorios');
+      return;
+    }
+    
+    Alert.alert('Éxito', 'Artículo guardado en el inventario');
+    console.log('Datos guardados:', form);
+    
+    // Limpiar formulario
+    setForm({
+      codigo: '',
+      nombre: '',
+      imagen: null,
+      cantidad: '',
+      valorUnitario: ''
+    });
+  };
+
+  // Verificar permisos de cámara
+  if (!permission) {
+    return <View style={styles.container}><Text>Cargando...</Text></View>;
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={{textAlign: 'center', marginBottom: 20}}>
+          Necesitamos permiso para acceder a la cámara y escanear códigos de barras
+        </Text>
+        <Button title="Conceder permiso" onPress={requestPermission} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Inventarios screen</Text>
+      {showScanner ? (
+        <View style={styles.scannerContainer}>
+          <CameraView
+            style={StyleSheet.absoluteFillObject}
+            facing={facing}
+            barcodeScannerSettings={{
+              barcodeTypes: ['ean13', 'ean8', 'upc_a', 'code128', 'qr']
+            }}
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+          >
+            <View style={styles.scannerOverlay}>
+              <TouchableOpacity
+                style={styles.flipButton}
+                onPress={() => setFacing(facing === ImagePicker.CameraType.back ? ImagePicker.CameraType.front : ImagePicker.CameraType.back)}
+              >
+                <Text style={styles.flipText}>Voltear Cámara</Text>
+              </TouchableOpacity>
+              <View style={styles.scannerFrame} />
+              <Button 
+                title="Cancelar" 
+                onPress={() => setShowScanner(false)} 
+                color="#ff4444"
+              />
+            </View>
+          </CameraView>
+        </View>
+      ) : (
+        <>
+        <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+          <Text style={styles.label}>Código de barras:</Text>
+          <View style={styles.codeContainer}>
+            <TextInput
+              style={styles.input}
+              value={form.codigo}
+              onChangeText={(text) => handleChange('codigo', text)}
+              placeholder="Escanea el código"
+            />
+            <Button 
+              title="Escanear" 
+              onPress={() => {
+                setScanned(false);
+                setShowScanner(true);
+              }} 
+            />
+          </View>
+
+          <Text style={styles.label}>Nombre del artículo:</Text>
+          <TextInput
+            style={styles.input}
+            value={form.nombre}
+            onChangeText={(text) => handleChange('nombre', text)}
+            placeholder="Ingrese el nombre"
+          />
+
+          <Text style={styles.label}>Foto del artículo:</Text>
+          {form.imagen && (
+            <Image source={{ uri: form.imagen }} style={styles.image} />
+          )}
+          <View style={styles.imageButtons}>
+            <Button title="Seleccionar de galería" onPress={pickImage} />
+            <Button title="Tomar foto" onPress={takePhoto} />
+          </View>
+
+          <Text style={styles.label}>Cantidad:</Text>
+          <TextInput
+            style={styles.input}
+            value={form.cantidad}
+            onChangeText={(text) => handleChange('cantidad', text)}
+            placeholder="Ingrese la cantidad"
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.label}>Valor unitario:</Text>
+          <TextInput
+            style={styles.input}
+            value={form.valorUnitario}
+            onChangeText={(text) => handleChange('valorUnitario', text)}
+            placeholder="Ingrese el valor unitario"
+            keyboardType="numeric"
+          />
+
+          <Button 
+            title="Guardar artículo" 
+            onPress={handleSubmit}
+            color="#4CAF50"
+          />
+          </ScrollView>
+        </>
+        
+      )}
     </View>
   );
 }
@@ -11,11 +213,82 @@ export default function InventarioScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#25292e',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    marginTop: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  input: {
+    height: 48,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  codeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'contain',
+    marginVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+  },
+  imageButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    gap: 10,
+  },
+  scannerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  scannerOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  text: {
-    color: '#fff',
+  scannerFrame: {
+    width: 250,
+    height: 150,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 10,
+    marginBottom: 20,
   },
+  flipButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 12,
+    borderRadius: 30,
+  },
+  flipText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  scrollContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  
 });
