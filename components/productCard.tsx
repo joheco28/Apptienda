@@ -28,7 +28,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     <View style={styles.card}>
       <Image
         source={
-          product.image ? { uri: product.image } : require("../assets/images/splash-icon.png")
+          product.image ? { uri: product.image } : require("../assets/images/producto1.jpg")
          
         }
         style={styles.image}

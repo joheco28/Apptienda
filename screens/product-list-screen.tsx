@@ -17,14 +17,14 @@ const PRODUCTS = [
     id: "2",
     name: "Running Shoes",
     price: 79.99,
-    image: "https://via.placeholder.com/150",
+    image: "https://unsplash.com/es/fotos/un-par-de-auriculares-sobre-fondo-rosa-QdG-XZZF3rY",
     category: "Sports",
   },
   {
     id: "3",
     name: "Coffee Maker",
     price: 49.99,
-    image: "https://via.placeholder.com/150",
+    image: "../assets/images/producto1.jpg",
     category: "Home",
   },
   {
@@ -32,20 +32,20 @@ const PRODUCTS = [
     name: "Smartphone",
     price: 699.99,
     image: "https://via.placeholder.com/150",
-    category: "Electronics",
+    category: "computacion",
   },
   {
     id: "5",
     name: "Yoga Mat",
     price: 29.99,
     image: null,
-    category: "Sports",
+    category: "accesrios",
   },
   {
     id: "6",
     name: "Blender",
     price: 39.99,
-    image: "https://via.placeholder.com/150",
+    image: "https://img.freepik.com/foto-gratis/resumen-borroso-supermercado-tienda-al-menor_74190-7546.jpg?t=st=1744922405~exp=1744926005~hmac=561a8366972032d56291ca66666e4807044ad71406ce420ec817d0dd21470c48&w=996",
     category: "Home",
   },
 ]
@@ -94,10 +94,9 @@ const handleAddToCart: HandleAddToCart = (product) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Products</Text>
 
       {/* Category Filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
+      <ScrollView  horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
         {categories.map((category) => (
           <TouchableOpacity
             key={category}
@@ -126,7 +125,7 @@ const handleAddToCart: HandleAddToCart = (product) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#b2babb",
     padding: 16,
   },
   title: {
@@ -136,7 +135,16 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   categoriesContainer: {
-    paddingVertical: 12,
+    marginBottom: 0,
+    width: "100%",
+    height: 120,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 8,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
   },
   categoryButton: {
     paddingHorizontal: 16,
@@ -144,6 +152,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     borderRadius: 20,
     backgroundColor: "#e9ecef",
+    fontSize: 14,
   },
   selectedCategory: {
     backgroundColor: "#007bff",
