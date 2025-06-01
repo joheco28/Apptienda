@@ -1,0 +1,380 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "a1cdbca1-1d08-4c6a-82e9-81ff3c618e86",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "categoria": {
+      "name": "categoria",
+      "columns": {
+        "id_categoria": {
+          "name": "id_categoria",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "descripcion": {
+          "name": "descripcion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "cliente": {
+      "name": "cliente",
+      "columns": {
+        "id_cliente": {
+          "name": "id_cliente",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "celular": {
+          "name": "celular",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "correo": {
+          "name": "correo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "detalle_venta": {
+      "name": "detalle_venta",
+      "columns": {
+        "id_detalle": {
+          "name": "id_detalle",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "id_venta": {
+          "name": "id_venta",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_producto": {
+          "name": "id_producto",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cantidad": {
+          "name": "cantidad",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "precio_unitario": {
+          "name": "precio_unitario",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subtotal": {
+          "name": "subtotal",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "detalle_venta_id_venta_venta_id_venta_fk": {
+          "name": "detalle_venta_id_venta_venta_id_venta_fk",
+          "tableFrom": "detalle_venta",
+          "tableTo": "venta",
+          "columnsFrom": [
+            "id_venta"
+          ],
+          "columnsTo": [
+            "id_venta"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "detalle_venta_id_producto_producto_id_producto_fk": {
+          "name": "detalle_venta_id_producto_producto_id_producto_fk",
+          "tableFrom": "detalle_venta",
+          "tableTo": "producto",
+          "columnsFrom": [
+            "id_producto"
+          ],
+          "columnsTo": [
+            "id_producto"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "detalle_venta_id_venta_id_producto_pk": {
+          "columns": [
+            "id_venta",
+            "id_producto"
+          ],
+          "name": "detalle_venta_id_venta_id_producto_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "producto": {
+      "name": "producto",
+      "columns": {
+        "id_producto": {
+          "name": "id_producto",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "codigo": {
+          "name": "codigo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "imagen": {
+          "name": "imagen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "descripcion": {
+          "name": "descripcion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "precio": {
+          "name": "precio",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stock": {
+          "name": "stock",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_categoria": {
+          "name": "id_categoria",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "producto_codigo_unique": {
+          "name": "producto_codigo_unique",
+          "columns": [
+            "codigo"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "producto_id_categoria_categoria_id_categoria_fk": {
+          "name": "producto_id_categoria_categoria_id_categoria_fk",
+          "tableFrom": "producto",
+          "tableTo": "categoria",
+          "columnsFrom": [
+            "id_categoria"
+          ],
+          "columnsTo": [
+            "id_categoria"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "vendedor": {
+      "name": "vendedor",
+      "columns": {
+        "id_vendedor": {
+          "name": "id_vendedor",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "celular": {
+          "name": "celular",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "correo": {
+          "name": "correo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "venta": {
+      "name": "venta",
+      "columns": {
+        "id_venta": {
+          "name": "id_venta",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "fecha": {
+          "name": "fecha",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "total": {
+          "name": "total",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_cliente": {
+          "name": "id_cliente",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_vendedor": {
+          "name": "id_vendedor",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "venta_id_cliente_cliente_id_cliente_fk": {
+          "name": "venta_id_cliente_cliente_id_cliente_fk",
+          "tableFrom": "venta",
+          "tableTo": "cliente",
+          "columnsFrom": [
+            "id_cliente"
+          ],
+          "columnsTo": [
+            "id_cliente"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "venta_id_vendedor_vendedor_id_vendedor_fk": {
+          "name": "venta_id_vendedor_vendedor_id_vendedor_fk",
+          "tableFrom": "venta",
+          "tableTo": "vendedor",
+          "columnsFrom": [
+            "id_vendedor"
+          ],
+          "columnsTo": [
+            "id_vendedor"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

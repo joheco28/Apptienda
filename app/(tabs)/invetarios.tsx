@@ -3,20 +3,34 @@ import { View, Text, TextInput, Button, StyleSheet, Image, Alert, Keyboard, Touc
 import { CameraView, useCameraPermissions, BarcodeScanningResult, CameraType } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
+
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useSQLiteContext } from "expo-sqlite";
+import { producto } from '@/database/schemas/tiendaSchema';
+
 export default function InventarioForm() {
   // Estados para la cámara y permisos
   const [facing, setFacing] = useState<CameraType>(ImagePicker.CameraType.back);
   const [scanned, setScanned] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  
+  // cargando la base de datos
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db, { schema: { producto } });
+
+
 
   // Estados del formulario
   const [form, setForm] = useState({
+    //id: '',
     codigo: '',
     nombre: '',
     imagen: null as string | null,
+    description: '',
+    category: '',
+    price: '',
     cantidad: '',
-    valorUnitario: ''
   });
 
   // Solicitar permisos al iniciar
@@ -75,24 +89,42 @@ export default function InventarioForm() {
   };
 
   // Enviar formulario
-  const handleSubmit = () => {
-    if (!form.codigo || !form.nombre || !form.cantidad || !form.valorUnitario) {
+  const handleSubmit = async() => {
+    if (!form.codigo || !form.nombre || !form.cantidad || !form.price) {
       Alert.alert('Error', 'Por favor complete todos los campos obligatorios');
       return;
     }
     
     Alert.alert('Éxito', 'Artículo guardado en el inventario');
+    // Aquí puedes guardar los datos en la base de datos
+
+    await drizzleDb.insert(producto).values({
+      codigo: form.codigo,
+      nombre: form.nombre,
+      image: form.imagen || '',
+      descripcion: form.description,
+      price: parseFloat(form.price),
+      cantidad: parseInt(form.cantidad, 10),
+      idCategoria: 1, // Asignar una categoría por defecto o manejarlo dinámicamente
+    }).run();
+    // Mostrar datos guardados en consola
+
     console.log('Datos guardados:', form);
     
     // Limpiar formulario
     setForm({
+      // id: '',
       codigo: '',
       nombre: '',
       imagen: null,
+      description: '',
+      category: '',
       cantidad: '',
-      valorUnitario: ''
+      price: ''
     });
   };
+
+
 
   // Verificar permisos de cámara
   if (!permission) {
@@ -179,6 +211,22 @@ export default function InventarioForm() {
             <Button title="Tomar foto" onPress={takePhoto} />
           </View>
 
+          <Text style={styles.label}>Descripción:</Text>
+          <TextInput
+            style={styles.input}
+            value={form.description}
+            onChangeText={(text) => handleChange('description', text)}
+            placeholder="Ingrese la descripción"
+          />
+
+           <Text style={styles.label}>Categoria:</Text>
+          <TextInput
+            style={styles.input}
+            value={form.description}
+            onChangeText={(text) => handleChange('category', text)}
+            placeholder="Ingrese la descripción"
+          />
+
           <Text style={styles.label}>Cantidad:</Text>
           <TextInput
             style={styles.input}
@@ -188,11 +236,11 @@ export default function InventarioForm() {
             keyboardType="numeric"
           />
 
-          <Text style={styles.label}>Valor unitario:</Text>
+          <Text style={styles.label}>Precio:</Text>
           <TextInput
             style={styles.input}
-            value={form.valorUnitario}
-            onChangeText={(text) => handleChange('valorUnitario', text)}
+            value={form.price}
+            onChangeText={(text) => handleChange('price', text)}
             placeholder="Ingrese el valor unitario"
             keyboardType="numeric"
           />
