@@ -222,7 +222,7 @@ export default function InventarioForm() {
            <Text style={styles.label}>Categoria:</Text>
           <TextInput
             style={styles.input}
-            value={form.description}
+            value={form.category}
             onChangeText={(text) => handleChange('category', text)}
             placeholder="Ingrese la descripción"
           />

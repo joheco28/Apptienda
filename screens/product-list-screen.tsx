@@ -4,6 +4,9 @@ import { useState, useEffect } from "react"
 import { Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from "react-native"
 import ProductCard from "../components/productCard"
 
+
+
+
 // Mock data - in a real app, this would come from an API
 const PRODUCTS = [
   {

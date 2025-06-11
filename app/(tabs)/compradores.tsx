@@ -1,7 +1,35 @@
-import { useState } from "react"
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native"
+import { useEffect, useState } from "react"
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from "react-native"
+
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useSQLiteContext } from "expo-sqlite";
+import { cliente } from '@/database/schemas/tiendaSchema';
+
 
 export default function RegistrationForm() {
+
+  // cargando la base de datos
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db, { schema: { cliente } });
+
+
+  const [ShowFormulario, setShowFormulario] = useState(true)
+  const [ShowClientes, setShowClientes] = useState(false)
+  const [showTitle, setShowTitle] = useState("Formulario de Registro")
+  type listClientes = {
+    idCliente: number;
+    nombre: string;
+    celular: string;
+    correo: string | null;
+  } 
+  const [listClientes, setListClientes] = useState<listClientes[]>([])
+
+  useEffect(() => {
+    loadClientes();
+  }, [])
+
+
+
   const [formData, setFormData] = useState({
     cedula: "",
     nombre: "",
@@ -16,6 +44,18 @@ export default function RegistrationForm() {
     correo: "",
   })
 
+
+  // carga datos del cliente
+
+  const loadClientes = async () => {
+    try {
+      const clientes = await drizzleDb.select().from(cliente);
+      setListClientes(clientes);
+    } catch (error) {
+      console.error("Error al cargar los clientes:", error);
+    }
+  };
+ 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
@@ -90,21 +130,66 @@ export default function RegistrationForm() {
     return isValid
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateForm()) {
       Alert.alert(
         "Formulario Enviado",
         `Cédula: ${formData.cedula}\nNombre: ${formData.nombre}\nCelular: ${formData.celular}\nCorreo: ${formData.correo}`,
         [{ text: "OK" }],
       )
-      // Aquí puedes enviar los datos a tu API o realizar otras acciones
+      //  codigo para insertar en la base de datos
+
+      await drizzleDb.insert(cliente).values({
+        nombre: formData.nombre,
+        celular: formData.celular,
+        correo: formData.correo,
+      }).then(() => {
+        Alert.alert("Éxito", "Datos guardados correctamente")
+      }).catch((error) => {
+        console.error("Error al guardar los datos:", error)
+        Alert.alert("Error", "No se pudieron guardar los datos")
+      })
+
+
+      loadClientes();
+
+      // Limpiar el formulario después de enviar
+      setFormData({
+        cedula: "",
+        nombre: "",
+        celular: "",
+        correo: "",
+      })
+      setErrors({
+        cedula: "",
+        nombre: "",
+        celular: "",
+        correo: "",
+      })  
+    }
+  }
+
+
+  //oculata y habilita formulario
+
+  const toggleFormulario = () => {
+    setShowFormulario(!ShowFormulario)
+    setShowClientes(!ShowClientes)
+    if (ShowFormulario) {
+      setShowTitle("Ver Formulario de Registro")
+    } else {
+      setShowTitle("Ver Lista de clientes")
     }
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Formulario de Registro</Text>
+      <TouchableOpacity style={styles.button} onPress={toggleFormulario}>
+        <Text style={styles.buttonText}>{showTitle}</Text>
+      </TouchableOpacity>
 
+    <View style={ShowFormulario ? styles.container : styles.ocultar}>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Cédula</Text>
         <TextInput
@@ -149,18 +234,38 @@ export default function RegistrationForm() {
           onChangeText={(text) => handleChange("correo", text)}
           keyboardType="email-address"
           autoCapitalize="none"
-        />
+          />
         {errors.correo ? <Text style={styles.errorText}>{errors.correo}</Text> : null}
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Enviar</Text>
       </TouchableOpacity>
+    </View>
+    <View style={ShowClientes ? styles.container : styles.ocultar}>
+      <Text style={styles.title}>Lista de Clientes</Text>
+      <FlatList
+        data={listClientes}
+        keyExtractor={(item) => item.idCliente.toString()} 
+        renderItem={({ item }) => (
+          <View style={styles.listContainer}>
+            <Text>Nombre: {item.nombre}</Text>
+            <Text>Celular: {item.celular}</Text>
+            <Text>Correo: {item.correo}</Text>
+          </View>
+        )}
+      />
+    </View>
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
+  ocultar: {
+    display: "none",
+  },
+
+
   container: {
     padding: 20,
     backgroundColor: "#f5f5f5",
@@ -205,6 +310,21 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  listContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 10,
   },
 })
 

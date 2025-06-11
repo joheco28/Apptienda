@@ -5,7 +5,7 @@ import ProductListScreen from "../../../screens/product-list-screen"
 
 
 
-export default function App() {
+export default function listProductos() {
   return (
     <SafeAreaProvider>
       <StatusBar style="auto" />

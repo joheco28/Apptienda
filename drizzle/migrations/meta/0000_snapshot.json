@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a1cdbca1-1d08-4c6a-82e9-81ff3c618e86",
+  "id": "38aca296-4069-4c07-a0c0-e033af1be943",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "categoria": {
@@ -148,15 +148,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "detalle_venta_id_venta_id_producto_pk": {
-          "columns": [
-            "id_venta",
-            "id_producto"
-          ],
-          "name": "detalle_venta_id_venta_id_producto_pk"
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     },

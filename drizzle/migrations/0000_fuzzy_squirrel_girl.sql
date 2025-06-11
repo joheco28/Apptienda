@@ -18,7 +18,6 @@ CREATE TABLE `detalle_venta` (
 	`cantidad` integer NOT NULL,
 	`precio_unitario` real NOT NULL,
 	`subtotal` real NOT NULL,
-	PRIMARY KEY(`id_venta`, `id_producto`),
 	FOREIGN KEY (`id_venta`) REFERENCES `venta`(`id_venta`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`id_producto`) REFERENCES `producto`(`id_producto`) ON UPDATE no action ON DELETE no action
 );

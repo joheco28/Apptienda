@@ -59,19 +59,17 @@ export const venta = sqliteTable("venta", {
 });
 
 // Tabla: DetalleVenta
-export const detalleVenta = sqliteTable("detalle_venta",{
-    idDetalle: integer("id_detalle").primaryKey({ autoIncrement: true }),
-    idVenta: integer("id_venta")
-      .references(() => venta.idVenta)
-      .notNull(),
-    idProducto: integer("id_producto")
-      .references(() => producto.idProducto)
-      .notNull(),
-    cantidad: integer("cantidad").notNull(),
-    precioUnitario: real("precio_unitario").notNull(),
-    subtotal: real("subtotal").notNull(),
-  },
-  (table) => ({
-    uniqueProductoEnVenta: primaryKey(table.idVenta, table.idProducto),
-  })
-);
+export const detalleVenta = sqliteTable("detalle_venta", {
+  idDetalle: integer("id_detalle").primaryKey({ autoIncrement: true }),
+  idVenta: integer("id_venta")
+    .references(() => venta.idVenta)
+    .notNull(),
+  idProducto: integer("id_producto")
+    .references(() => producto.idProducto)
+    .notNull(),
+  cantidad: integer("cantidad").notNull(),
+  precioUnitario: real("precio_unitario").notNull(),
+  subtotal: real("subtotal").notNull(),
+});
+
+

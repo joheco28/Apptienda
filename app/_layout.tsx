@@ -25,14 +25,13 @@ const {success, error} = useMigrations(db, migrations);
 
 
   return (
-    <Stack>
-      <SQLiteProvider databaseName={DATABASE_NAME}>
-      <Stack.Screen 
-      name="(tabs)"
-      options={{ headerShown: false }} />
-      </SQLiteProvider>
-      
-    </Stack>
+    <SQLiteProvider databaseName={DATABASE_NAME}>
+      <Stack>
+        <Stack.Screen 
+        name="(tabs)"
+        options={{ headerShown: false }} />  
+      </Stack>
+    </SQLiteProvider>
   );
 }
 

@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { DataTable } from 'react-native-paper';
-import { Text } from 'react-native-paper'; 
+// import { Text } from 'react-native-paper'; 
 
 
 
@@ -61,16 +61,16 @@ const TablaCarrito: React.FC<TablaCarritoProps> = ({ data, sum, onEliminar }) =>
                     <Text style={styles.texto}>Total</Text>
                 </DataTable.Cell>
                 <DataTable.Cell >
-                    <Text style={styles.texto}>""</Text>
+                    <Text style={styles.texto}></Text>
                 </DataTable.Cell>
                 <DataTable.Cell >
-                    <Text style={styles.texto}>""</Text>
+                    <Text style={styles.texto}></Text>
                 </DataTable.Cell>
                 <DataTable.Cell numeric>
                     <Text style={styles.texto}>{sum.toFixed(2)}</Text> 
                 </DataTable.Cell>
                 <DataTable.Cell >
-                <Text style={styles.texto}>""</Text>
+                <Text style={styles.texto}></Text>
                 </DataTable.Cell>
             </DataTable.Row>
         </DataTable>

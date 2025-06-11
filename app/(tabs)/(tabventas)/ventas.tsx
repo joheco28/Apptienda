@@ -18,7 +18,7 @@ const sum = data.reduce(
 );
 
 const eliminarItem = (id: number) => {
-  console.log(`Eliminar item con ID: ${id}`);
+  console.log("Eliminar item con ID: ${id}");
   // Aquí puedes agregar la lógica para eliminar el item del carrito
 };
 
@@ -41,13 +41,6 @@ export default function VentasScreen() {
   const showDialog = () => setDialogVisible(true)
   const hideDialog = () => setDialogVisible(false)
 
-  const RegistraVenta = () => {
-    console.log("Registrar venta");
-  };
-
-  const CrearFactura = () => {
-    console.log("Crear factura");
-  };
 
   const handleConfirm = () => {
     if (optboton === 1) {
@@ -67,9 +60,8 @@ export default function VentasScreen() {
   
 
   return (
-    <>
+  
       <PaperProvider>
-        
         <View style={styles.container}>
           <TablaCarrito data={data} sum={sum} onEliminar={eliminarItem} />
         </View>
@@ -79,23 +71,19 @@ export default function VentasScreen() {
             onPress={() => {
               setOptboton(1);
               showDialog();
- 
             } }
           >
             <Text style={styles.textBoton}>Registra Venta</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.Boton}
             onPress={() => {
               setOptboton(2);
               showDialog();
-
             } }
           >
             <Text style={styles.textBoton}>Crear Factura</Text>
-          </TouchableOpacity>
-          
+          </TouchableOpacity>  
           <AccionDialogo
           visible={dialogVisible}
           title= {optboton === 1 ? "Registrar Venta" : "Crear Factura"}
@@ -108,7 +96,7 @@ export default function VentasScreen() {
         />
         </View>
       </PaperProvider>
-    </>
+
   );
 }
 
