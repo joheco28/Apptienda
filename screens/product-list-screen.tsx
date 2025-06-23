@@ -1,72 +1,70 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from "react-native"
 import ProductCard from "../components/productCard"
 
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useSQLiteContext } from "expo-sqlite";
+import { producto } from '@/database/schemas/tiendaSchema';
+import { useFocusEffect } from "expo-router";
 
 
-
-// Mock data - in a real app, this would come from an API
-const PRODUCTS = [
-  {
-    id: "1",
-    name: "Wireless Headphones",
-    price: 99.99,
-    image: null, // Will use default image
-    category: "Electronics",
-  },
-  {
-    id: "2",
-    name: "Running Shoes",
-    price: 79.99,
-    image: "https://unsplash.com/es/fotos/un-par-de-auriculares-sobre-fondo-rosa-QdG-XZZF3rY",
-    category: "Sports",
-  },
-  {
-    id: "3",
-    name: "Coffee Maker",
-    price: 49.99,
-    image: "../assets/images/producto1.jpg",
-    category: "Home",
-  },
-  {
-    id: "4",
-    name: "Smartphone",
-    price: 699.99,
-    image: "https://via.placeholder.com/150",
-    category: "computacion",
-  },
-  {
-    id: "5",
-    name: "Yoga Mat",
-    price: 29.99,
-    image: null,
-    category: "accesrios",
-  },
-  {
-    id: "6",
-    name: "Blender",
-    price: 39.99,
-    image: "https://img.freepik.com/foto-gratis/resumen-borroso-supermercado-tienda-al-menor_74190-7546.jpg?t=st=1744922405~exp=1744926005~hmac=561a8366972032d56291ca66666e4807044ad71406ce420ec817d0dd21470c48&w=996",
-    category: "Home",
-  },
-]
 
 export default function ProductListScreen() {
-  const [products, setProducts] = useState(PRODUCTS)
-  const [filteredProducts, setFilteredProducts] = useState(PRODUCTS)
+
+type products = {
+  id: number;
+  name: string;
+  price: number;
+  image: string | null;
+  category: number;
+}
+
+const [products, setProducts] = useState<products[]>([])
+
+// cargando base de datos
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db, { schema: { producto } });
+
+// cargado productos
+const loadProductos = async () => {
+    try {
+      const productos = await drizzleDb.select({
+        id: producto.idProducto,
+        name: producto.nombre,
+        price: producto.price,
+        image: producto.image,
+        category: producto.idCategoria, 
+        }).from(producto);
+      setProducts(productos);
+    } catch (error) {
+      console.error("Error al cargar los clientes:", error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProductos();
+    }, [])
+  );
+
+
+  // State to manage products and filtering
+
+  
+  const [filteredProducts, setFilteredProducts] = useState(products)
   const [selectedCategory, setSelectedCategory] = useState("All")
 
   // Extract unique categories from products
-  const categories = ["All", ...new Set(PRODUCTS.map((product) => product.category))]
+  const categories = ["All", ...new Set(products.map((product) => product.category))]
 
   // Filter products when category changes
   useEffect(() => {
     if (selectedCategory === "All") {
       setFilteredProducts(products)
     } else {
-      setFilteredProducts(products.filter((product) => product.category === selectedCategory))
+      setFilteredProducts(products.filter((product) => String(product.category) === selectedCategory))
     }
   }, [selectedCategory, products])
 
@@ -104,7 +102,7 @@ const handleAddToCart: HandleAddToCart = (product) => {
           <TouchableOpacity
             key={category}
             style={[styles.categoryButton, selectedCategory === category && styles.selectedCategory]}
-            onPress={() => handleCategoryPress(category)}
+            onPress={() => handleCategoryPress(String(category))}
           >
             <Text style={[styles.categoryText, selectedCategory === category && styles.selectedCategoryText]}>
               {category}
@@ -116,9 +114,14 @@ const handleAddToCart: HandleAddToCart = (product) => {
       {/* Products List */}
       <FlatList
         data={filteredProducts}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         numColumns={2}
-        renderItem={({ item }) => <ProductCard product={item} onAddToCart={() => handleAddToCart(item)} />}
+        renderItem={({ item }) => (
+          <ProductCard
+            product={{ ...item, id: String(item.id), category: String(item.category) }}
+            onAddToCart={() => handleAddToCart({ ...item, id: String(item.id), category: String(item.category) })}
+          />
+        )}
         contentContainerStyle={styles.productList}
       />
     </SafeAreaView>

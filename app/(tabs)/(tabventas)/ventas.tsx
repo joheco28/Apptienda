@@ -56,9 +56,6 @@ export default function VentasScreen() {
     // Aquí puedes agregar la lógica que se ejecutará al cancelar
   }
 
-
-  
-
   return (
   
       <PaperProvider>

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from "react-native"
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList, SafeAreaView } from "react-native"
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import { cliente } from '@/database/schemas/tiendaSchema';
+import { eq } from "drizzle-orm";
 
 
 export default function RegistrationForm() {
@@ -13,9 +14,13 @@ export default function RegistrationForm() {
   const drizzleDb = drizzle(db, { schema: { cliente } });
 
 
-  const [ShowFormulario, setShowFormulario] = useState(true)
-  const [ShowClientes, setShowClientes] = useState(false)
-  const [showTitle, setShowTitle] = useState("Formulario de Registro")
+  const [ShowFormulario, setShowFormulario] = useState(true);
+  const [ShowClientes, setShowClientes] = useState(false);
+  const [showTitle, setShowTitle] = useState("Formulario de Registro");
+  const [showboton, setShowBoton] = useState("Enviar");
+  const [idcliente, setIdCliente] = useState<number | null>(0);
+  
+  
   type listClientes = {
     idCliente: number;
     nombre: string;
@@ -137,18 +142,42 @@ export default function RegistrationForm() {
         `Cédula: ${formData.cedula}\nNombre: ${formData.nombre}\nCelular: ${formData.celular}\nCorreo: ${formData.correo}`,
         [{ text: "OK" }],
       )
+     
+     
+     
       //  codigo para insertar en la base de datos
 
-      await drizzleDb.insert(cliente).values({
-        nombre: formData.nombre,
-        celular: formData.celular,
-        correo: formData.correo,
-      }).then(() => {
-        Alert.alert("Éxito", "Datos guardados correctamente")
-      }).catch((error) => {
-        console.error("Error al guardar los datos:", error)
-        Alert.alert("Error", "No se pudieron guardar los datos")
-      })
+      if(showboton === "Enviar") {
+
+        await drizzleDb.insert(cliente).values({
+          nombre: formData.nombre,
+          celular: formData.celular,
+          correo: formData.correo,
+        }).then(() => {
+          Alert.alert("Éxito", "Datos guardados correctamente")
+        }).catch((error) => {
+          console.error("Error al guardar los datos:", error)
+          Alert.alert("Error", "No se pudieron guardar los datos")
+        })
+      }
+      else if (showboton === "Actualizar" && idcliente !== null) { 
+        await drizzleDb.update(cliente)
+          .set({
+            nombre: formData.nombre,
+            celular: formData.celular,
+            correo: formData.correo,
+          })
+          .where(eq(cliente.idCliente, idcliente))
+          .then(() => {
+            Alert.alert("Éxito", "Datos actualizados correctamente")
+          })
+          .catch((error) => {
+            console.error("Error al actualizar los datos:", error)
+            Alert.alert("Error", "No se pudieron actualizar los datos")
+          })
+          setShowBoton("Enviar");
+          setIdCliente(null);
+      }
 
 
       loadClientes();
@@ -160,6 +189,8 @@ export default function RegistrationForm() {
         celular: "",
         correo: "",
       })
+
+      // Limpiar los errores
       setErrors({
         cedula: "",
         nombre: "",
@@ -182,12 +213,15 @@ export default function RegistrationForm() {
     }
   }
 
+  // Renderizar el formulario y la lista de clientes
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Formulario de Registro</Text>
       <TouchableOpacity style={styles.button} onPress={toggleFormulario}>
         <Text style={styles.buttonText}>{showTitle}</Text>
       </TouchableOpacity>
+
 
     <View style={ShowFormulario ? styles.container : styles.ocultar}>
       <View style={styles.inputContainer}>
@@ -239,9 +273,11 @@ export default function RegistrationForm() {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Enviar</Text>
+        <Text style={styles.buttonText}>{showboton}</Text>
       </TouchableOpacity>
     </View>
+    
+
     <View style={ShowClientes ? styles.container : styles.ocultar}>
       <Text style={styles.title}>Lista de Clientes</Text>
       <FlatList
@@ -249,14 +285,79 @@ export default function RegistrationForm() {
         keyExtractor={(item) => item.idCliente.toString()} 
         renderItem={({ item }) => (
           <View style={styles.listContainer}>
-            <Text>Nombre: {item.nombre}</Text>
-            <Text>Celular: {item.celular}</Text>
-            <Text>Correo: {item.correo}</Text>
+            <View style={{ flexDirection: "column", justifyContent: "space-between" }}>
+              <Text style={styles.textname}>Nombre: {item.nombre}</Text>
+              <Text style={styles.textcelular} >Celular: {item.celular}</Text>
+              <Text style={styles.textcorreo}>Correo: {item.correo}</Text>
+            </View>
+            <View style={{ flexDirection: "column", justifyContent: "space-between", marginTop: 10 }}>
+                          <TouchableOpacity
+              style={styles.eliminar}
+              onPress={() => {
+                Alert.alert(
+                  "Eliminar Cliente",
+                  `¿Estás seguro de eliminar a ${item.nombre}?`,
+                  [
+                    {
+                      text: "Cancelar",
+                      style: "cancel",
+                    },
+                    {
+                      text: "Eliminar",
+                      onPress: async () => {
+                        try {
+                         await drizzleDb.delete(cliente).where(eq(cliente.idCliente, item.idCliente));
+                          loadClientes();
+                          Alert.alert("Éxito", "Cliente eliminado correctamente");
+                        } catch (error) {
+                          console.error("Error al eliminar el cliente:", error);
+                          Alert.alert("Error", "No se pudo eliminar el cliente");
+                        }
+                      },
+                    },
+                  ],
+                );
+              }}>
+              <Text style={styles.buttonText}>Eliminar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                Alert.alert(
+                  "Editar Cliente",
+                  `¿Estás seguro de editar a ${item.nombre}?`,
+                  [
+                    {
+                      text: "Cancelar",
+                      style: "cancel",
+                    },
+                    {
+                      text: "Editar",
+                      onPress: async () => {
+                        setShowFormulario(true);
+                        setShowClientes(false);
+                        setShowBoton("Actualizar");
+                        setIdCliente(item.idCliente);
+                        setFormData({
+                          cedula: item.idCliente.toString(), // Asumiendo que la cédula es el ID del cliente
+                          nombre: item.nombre,
+                          celular: item.celular,
+                          correo: item.correo || "",
+                        });
+                      },
+                    },
+                  ],
+                );
+              }}>
+              <Text style={styles.buttonText}>Editar</Text>
+            </TouchableOpacity>
+            </View>
+
           </View>
         )}
       />
     </View>
-    </ScrollView>
+    </SafeAreaView>
   )
 }
 
@@ -267,6 +368,7 @@ const styles = StyleSheet.create({
 
 
   container: {
+    flex: 1,
     padding: 20,
     backgroundColor: "#f5f5f5",
   },
@@ -312,6 +414,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   listContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 20,
     padding: 15,
     backgroundColor: "#fff",
@@ -326,5 +430,28 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginBottom: 10,
   },
+  textname: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  textcelular: {
+    fontSize: 16,
+    color: "#555",
+  },
+  textcorreo: {
+    fontSize: 16,
+    color: "#555",
+  },
+
+  eliminar: {
+    borderRadius: 5,
+    backgroundColor: '#f44336',
+    padding: 5,
+    color: 'white',
+    fontWeight: 'bold',
+    alignItems: "center",
+    justifyContent: "center",
+    },
 })
 
