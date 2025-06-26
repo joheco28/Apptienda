@@ -7,11 +7,13 @@ import { categoria } from "@/database/schemas/tiendaSchema"; // Asegúrate de qu
 type EditDialogoProps = {
   visible: boolean;
   onDismiss: () => void;
+  actualizar: () => void; // Añadido para manejar la actualización
 };
 
 const EditDialogo =({
 visible,
 onDismiss,
+actualizar,
 }: EditDialogoProps) => {
 
      // cargando la base de datos
@@ -34,6 +36,8 @@ onDismiss,
                 nombre: nomcategoria,
                 descripcion: descripcion,
             });
+            // Llama a la función de actualización después de guardar
+            actualizar();
             console.log("Categoria guardada exitosamente");
         } catch (error) {
             console.error("Error al guardar la categoria:", error);

@@ -21,9 +21,15 @@ import * as ImagePicker from "expo-image-picker";
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
-import { producto } from "@/database/schemas/tiendaSchema";
+import { producto, categoria } from "@/database/schemas/tiendaSchema";
 import EditDialogo from "@/components/EditDialogo";
 import { PaperProvider } from "react-native-paper";
+import DropdownComponent from "@/components/DropdownComponent";
+
+
+// Componente principal del formulario de inventario
+// Este componente permite escanear códigos de barras, tomar fotos y seleccionar imágenes de la galería para agregar productos al inventario.
+// También incluye un diálogo para ingresar categorías de productos.
 
 export default function InventarioForm() {
   // Estados para la cámara y permisos
@@ -52,6 +58,37 @@ export default function InventarioForm() {
 const [dialogVisible, setDialogVisible] = useState(false)
 const showDialog = () => setDialogVisible(true)
 const hideDialog = () => setDialogVisible(false)
+
+// seleccionar categoria
+type listcategorias = {
+    idcategoria: string;
+    nombrecategoria: string;
+  } 
+const [listcategory, setListcategory] = useState<listcategorias[]>([])
+
+  // consulta categorias
+  // const [categorias, setCategorias] = useState([]);
+  // useEffect(() => { 
+
+  useEffect(() => {
+    fetchCategorias();
+  }, []);
+
+  const fetchCategorias = async () => {
+    try {
+      const categorias = await drizzleDb.select().from(categoria);
+      setListcategory(
+        categorias.map((cat: any) => ({
+          idcategoria: String(cat.idCategoria),
+          nombrecategoria: cat.nombre,
+        }))
+      );
+      console.log("Categorias:", categorias);
+    } catch (error) {
+      console.error("Error al obtener categorías:", error);
+    }
+  };
+
 
 
 
@@ -178,11 +215,16 @@ const hideDialog = () => setDialogVisible(false)
     );
   }
 
+
+  
+
+ 
+
   return (
     <>
     
     <PaperProvider>
-      <EditDialogo visible={dialogVisible} onDismiss={hideDialog} />
+      <EditDialogo visible={dialogVisible} onDismiss={hideDialog} actualizar={fetchCategorias} />
     
     <View style={styles.container}>
       {showScanner ? (
@@ -265,21 +307,31 @@ const hideDialog = () => setDialogVisible(false)
               onChangeText={(text) => handleChange("description", text)}
               placeholder="Ingrese la descripción"
             />
+
             <View style={styles.contenirecategoria}> 
             <Text style={styles.label}>Categoria:</Text>
-            <TextInput
-              style={styles.input}
-              value={form.category}
-              onChangeText={(text) => handleChange("category", text)}
-              placeholder="Ingrese la descripción"
-            />
-            <Button
-              title="Ingresar Categoria"
-              onPress={() => {
-                showDialog();
-              }}>              
-            </Button>
             
+            <View style={{ flex: 1, marginLeft: 10, alignItems: "center", flexDirection: "row" }}>
+              <View style={{ flex: 1, marginRight: 10, alignItems: "center" }}>
+              <DropdownComponent
+                data={listcategory}
+                handleChange={(name, value) => handleChange(name, value)}
+              />
+            </View>
+ 
+             <View style={{ flex: 1, alignItems: "center" }}>
+                <Button
+                color="#7B68EE"
+                title="Ingresar Categoria"
+                onPress={() => {
+                  showDialog();
+                }}
+              />
+             </View>
+            </View>
+
+
+                         
             </View>
 
             <Text style={styles.label}>Cantidad:</Text>
@@ -322,7 +374,7 @@ const styles = StyleSheet.create({
   },
   contenirecategoria: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
     backgroundColor: "#fff",
   },
