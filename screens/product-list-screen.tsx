@@ -1,42 +1,52 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from "react-native"
-import ProductCard from "../components/productCard"
+import { useState, useEffect, useCallback } from "react";
+import {
+  Text,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import ProductCard from "../components/productCard";
+import {useCart} from "@/contexto/carritoContext";
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
-import { producto } from '@/database/schemas/tiendaSchema';
+import { producto, categoria } from "@/database/schemas/tiendaSchema";
 import { useFocusEffect } from "expo-router";
-
-
+import { eq } from "drizzle-orm";
 
 export default function ProductListScreen() {
+  type products = {
+    id: number;
+    name: string;
+    price: number;
+    image: string | null;
+    category: string | null;
+  };
 
-type products = {
-  id: number;
-  name: string;
-  price: number;
-  image: string | null;
-  category: number;
-}
+  const { state, addItem } = useCart();
+  const [products, setProducts] = useState<products[]>([]);
 
-const [products, setProducts] = useState<products[]>([])
-
-// cargando base de datos
+  // cargando base de datos
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db, { schema: { producto } });
 
-// cargado productos
-const loadProductos = async () => {
+  // cargado productos
+  const loadProductos = async () => {
     try {
-      const productos = await drizzleDb.select({
-        id: producto.idProducto,
-        name: producto.nombre,
-        price: producto.price,
-        image: producto.image,
-        category: producto.idCategoria, 
-        }).from(producto);
+      const productos = await drizzleDb
+        .select({
+          id: producto.idProducto,
+          name: producto.nombre,
+          price: producto.price,
+          image: producto.image,
+          category: categoria.nombre,
+        })
+        .from(producto)
+        .leftJoin(categoria, eq(categoria.idCategoria, producto.idCategoria));
       setProducts(productos);
     } catch (error) {
       console.error("Error al cargar los clientes:", error);
@@ -49,62 +59,78 @@ const loadProductos = async () => {
     }, [])
   );
 
-
   // State to manage products and filtering
 
-  
-  const [filteredProducts, setFilteredProducts] = useState(products)
-  const [selectedCategory, setSelectedCategory] = useState("All")
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Extract unique categories from products
-  const categories = ["All", ...new Set(products.map((product) => product.category))]
+  const categories = [
+    "All",
+    ...new Set(products.map((product) => product.category)),
+  ];
 
   // Filter products when category changes
   useEffect(() => {
     if (selectedCategory === "All") {
-      setFilteredProducts(products)
+      setFilteredProducts(products);
     } else {
-      setFilteredProducts(products.filter((product) => String(product.category) === selectedCategory))
+      setFilteredProducts(
+        products.filter(
+          (product) => String(product.category) === selectedCategory
+        )
+      );
     }
-  }, [selectedCategory, products])
+  }, [selectedCategory, products]);
 
-interface CategoryPressHandler {
+  interface CategoryPressHandler {
     (category: string): void;
-}
+  }
 
-const handleCategoryPress: CategoryPressHandler = (category) => {
+  const handleCategoryPress: CategoryPressHandler = (category) => {
     setSelectedCategory(category);
-};
+  };
 
-interface Product {
+  interface Product {
     id: string;
     name: string;
     price: number;
     image: string | null;
     category: string;
-}
+  }
 
-interface HandleAddToCart {
+  interface HandleAddToCart {
     (product: Product): void;
-}
+  }
 
-const handleAddToCart: HandleAddToCart = (product) => {
+  const handleAddToCart: HandleAddToCart = (product) => {
     console.log("Added to cart:", product.name);
-    // In a real app, this would dispatch to a cart state manager
-};
+    addItem({id: product.id, producto: product.name, cantidad: 1, precio: product.price});
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-
       {/* Category Filter */}
-      <ScrollView  horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoriesContainer}
+      >
         {categories.map((category) => (
           <TouchableOpacity
             key={category}
-            style={[styles.categoryButton, selectedCategory === category && styles.selectedCategory]}
+            style={[
+              styles.categoryButton,
+              selectedCategory === category && styles.selectedCategory,
+            ]}
             onPress={() => handleCategoryPress(String(category))}
           >
-            <Text style={[styles.categoryText, selectedCategory === category && styles.selectedCategoryText]}>
+            <Text
+              style={[
+                styles.categoryText,
+                selectedCategory === category && styles.selectedCategoryText,
+              ]}
+            >
               {category}
             </Text>
           </TouchableOpacity>
@@ -118,14 +144,24 @@ const handleAddToCart: HandleAddToCart = (product) => {
         numColumns={2}
         renderItem={({ item }) => (
           <ProductCard
-            product={{ ...item, id: String(item.id), category: String(item.category) }}
-            onAddToCart={() => handleAddToCart({ ...item, id: String(item.id), category: String(item.category) })}
+            product={{
+              ...item,
+              id: String(item.id),
+              category: String(item.category),
+            }}
+            onAddToCart={() =>
+              handleAddToCart({
+                ...item,
+                id: String(item.id),
+                category: String(item.category),
+              })
+            }
           />
         )}
         contentContainerStyle={styles.productList}
       />
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -173,4 +209,4 @@ const styles = StyleSheet.create({
   productList: {
     paddingTop: 8,
   },
-})
+});

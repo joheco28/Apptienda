@@ -1,22 +1,24 @@
-import { Tabs } from 'expo-router';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Tabs } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { CartProvider } from "@/contexto/carritoContext";
 
 const COLORS = {
-  headerBackground: '#2c3e50',
-  tabBarBackground: '#25292e',
-  activeTintColor: '#fff',
-  inactiveTintColor: '#ccc', // Ejemplo, si quisieras un color diferente para inactivos
-  headerTintColor: '#fff',
+  headerBackground: "#2c3e50",
+  tabBarBackground: "#25292e",
+  activeTintColor: "#fff",
+  inactiveTintColor: "#ccc",
+  headerTintColor: "#fff",
 };
 
 const ICON_SIZE = 24;
 
 export default function VentasLayout() {
-    return (
+  return (
+    <CartProvider>
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: COLORS.activeTintColor,
-          tabBarPosition: 'top',
+          tabBarPosition: "top",
           headerStyle: {
             backgroundColor: COLORS.headerBackground,
           },
@@ -25,27 +27,36 @@ export default function VentasLayout() {
           tabBarStyle: {
             backgroundColor: COLORS.tabBarBackground,
           },
-          animation:'fade',
+          animation: "fade",
         }}
       >
         <Tabs.Screen
-          name="listProductos" 
+          name="listProductos"
           options={{
-                title: "Lista de productos",
-                tabBarIcon: ({ color, focused }) => (
-                <Ionicons name={focused ? 'list-sharp' : 'list-outline'} color={color} size={ICON_SIZE} />
-                ),
-            }}
+            title: "Lista de productos",
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons
+                name={focused ? "list-sharp" : "list-outline"}
+                color={color}
+                size={ICON_SIZE}
+              />
+            ),
+          }}
         />
         <Tabs.Screen
-          name="ventas" 
+          name="ventas"
           options={{
-                title: "Carrito de ventas",
-                tabBarIcon: ({ color, focused }) => (
-                <Ionicons name={focused ? 'cart-sharp' : 'cart-outline'} color={color} size={ICON_SIZE} />
-                ),
-            }}
+            title: "Carrito de ventas",
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons
+                name={focused ? "cart-sharp" : "cart-outline"}
+                color={color}
+                size={ICON_SIZE}
+              />
+            ),
+          }}
         />
       </Tabs>
-    );
-  }
+    </CartProvider>
+  );
+}

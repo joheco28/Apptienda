@@ -3,43 +3,93 @@ import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import TablaCarrito from "@/components/TablaCarrito";
 import AccionDialogo from "@/components/AccionDialogo";
 import { PaperProvider } from "react-native-paper";
+import { useCart } from "@/contexto/carritoContext";
 
-const data = [
-  { id: 1, articulo: "Producto 1", precio: 10.0, cantidad: 2 },
-  { id: 2, articulo: "Producto 2", precio: 20.0, cantidad: 1 },
-  { id: 3, articulo: "Producto 3", precio: 15.0, cantidad: 3 },
-  { id: 4, articulo: "Producto 4", precio: 5.0, cantidad: 5 },
-  { id: 5, articulo: "Producto 5", precio: 30.0, cantidad: 1 },
-];
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useSQLiteContext } from "expo-sqlite";
+import { venta, detalleVenta } from "@/database/schemas/tiendaSchema";
 
-const sum = data.reduce(
-  (total, item) => total + item.precio * item.cantidad,
-  0
-);
 
-const eliminarItem = (id: number) => {
-  console.log("Eliminar item con ID: ${id}");
-  // Aquí puedes agregar la lógica para eliminar el item del carrito
-};
-
-const RegistraVenta = () => {
-  console.log("Registrar venta");
-};
-
-const CrearFactura = () => {
-  // Aquí puedes agregar la lógica para crear la factura
-  console.log("Crear factura");
-};
 
 //inicio de componente
 
 export default function VentasScreen() {
   const [dialogVisible, setDialogVisible] = useState(false)
   const [optboton, setOptboton] = useState(1)
-
-
   const showDialog = () => setDialogVisible(true)
   const hideDialog = () => setDialogVisible(false)
+
+   // cargando base de datos
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db, { schema: { venta, detalleVenta } });
+
+  const { state, removeItem, clearCart,updateQuantity } = useCart();
+  const data = state.items.map((item) => ({
+    id: item.id,
+    articulo: item.producto,
+    precio: item.precio,
+    cantidad: item.cantidad,
+    subtotal: item.subtotal, 
+  }));  
+
+  const sum = state.total; // Asegúrate de que el total esté calculado en tu contexto
+
+
+const eliminarItem = (id: string) => {
+
+  console.log("Eliminar item con ID:",id);
+  // Aquí puedes agregar la lógica para eliminar el item del carrito
+  removeItem(id);
+};
+
+const RegistraVenta = async () => {
+  console.log("Registrando venta...");
+
+  try {
+    // 1. Insertar en la tabla 'venta' y obtener el ID de la nueva venta.
+    const newVentas = await drizzleDb.insert(venta).values({
+      fecha: new Date().toISOString(),
+      total: sum,
+      idCliente: 1, 
+      idVendedor: 1, 
+    }).returning({ idVenta: venta.idVenta });
+
+    if (!newVentas || newVentas.length === 0) {
+      console.error("Error: No se pudo registrar la venta y obtener el ID.");
+      // Aquí podrías mostrar una alerta al usuario.
+      return;
+    }
+
+    const ventaId = newVentas[0].idVenta;
+    console.log("Venta registrada exitosamente con ID:", ventaId);
+
+    // 2. Insertar cada item del carrito en la tabla 'detalleVenta'.
+  
+    await Promise.all(data.map(item => {
+      // Aseguramos que el id del producto sea un número, ya que puede venir como string.
+      const productId = typeof item.id === 'string' ? parseInt(item.id, 10) : item.id;
+
+      return drizzleDb.insert(detalleVenta).values({
+        idVenta: ventaId, 
+        idProducto: productId,
+        cantidad: item.cantidad,
+        precioUnitario: item.precio,
+        subtotal: item.subtotal,
+      });
+    }));
+
+    console.log("Detalles de la venta registrados exitosamente.");
+    clearCart(); // Limpiar el carrito después de registrar la venta.
+  } catch (error) {
+    console.error("Error al registrar la venta:", error);
+    // Aquí podrías mostrar una alerta de error al usuario.
+  }
+};
+
+const CrearFactura = () => {
+  // Aquí puedes agregar la lógica para crear la factura
+  console.log("Crear factura");
+};
 
 
   const handleConfirm = () => {
@@ -51,6 +101,7 @@ export default function VentasScreen() {
 
   }
 
+
   const handleCancel = () => {
     console.log("Cancelado")
     // Aquí puedes agregar la lógica que se ejecutará al cancelar
@@ -60,9 +111,24 @@ export default function VentasScreen() {
   
       <PaperProvider>
         <View style={styles.container}>
-          <TablaCarrito data={data} sum={sum} onEliminar={eliminarItem} />
+          { data.length === 0 ? (
+            <Text style={styles.text}>No hay productos en el carrito</Text>
+          ) : (
+            <TablaCarrito data={data} sum={sum} onEliminar={eliminarItem} />
+          )}
         </View>
+          {data.length != 0 ? (
+
         <View style={styles.conteinerPie}>
+          <TouchableOpacity
+            style={styles.Boton}
+            onPress={() => {
+              clearCart();
+            } }
+          >
+            <Text style={styles.textBoton}>Limpiar Carrito</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.Boton}
             onPress={() => {
@@ -72,6 +138,7 @@ export default function VentasScreen() {
           >
             <Text style={styles.textBoton}>Registra Venta</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.Boton}
             onPress={() => {
@@ -80,7 +147,8 @@ export default function VentasScreen() {
             } }
           >
             <Text style={styles.textBoton}>Crear Factura</Text>
-          </TouchableOpacity>  
+          </TouchableOpacity> 
+
           <AccionDialogo
           visible={dialogVisible}
           title= {optboton === 1 ? "Registrar Venta" : "Crear Factura"}
@@ -92,6 +160,8 @@ export default function VentasScreen() {
           onDismiss={hideDialog}
         />
         </View>
+          ) : null}
+
       </PaperProvider>
 
   );
@@ -105,12 +175,12 @@ const styles = StyleSheet.create({
   },
   conteinerPie: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 10,
-    backgroundColor: "#25292e",
+    justifyContent: "space-around",
     alignItems: "center",
-    marginTop: 10,
-    height: 100,
+    padding: 2,
+    backgroundColor: "#25292e",
+    marginTop: 0,
+    height: 70,
     width: "100%",
   },
   text: {
@@ -119,7 +189,7 @@ const styles = StyleSheet.create({
 
   textBoton: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: 15,
   },
 
   Boton: {
@@ -127,7 +197,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     margin: 10,
-    width: "45%",
     alignItems: "center",
   },
 });
