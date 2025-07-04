@@ -7,7 +7,7 @@ import { useCart } from "@/contexto/carritoContext";
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
-import { venta, detalleVenta } from "@/database/schemas/tiendaSchema";
+import { venta, detalleVenta, cliente } from "@/database/schemas/tiendaSchema";
 
 
 
@@ -23,6 +23,13 @@ export default function VentasScreen() {
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db, { schema: { venta, detalleVenta } });
 
+  type clientes = {
+    idcategoria: string;
+    nombrecategoria: string;
+  } 
+
+  const [listClientes, setListClientes] = useState<clientes[]>([]);
+
   const { state, removeItem, clearCart,updateQuantity } = useCart();
   const data = state.items.map((item) => ({
     id: item.id,
@@ -34,6 +41,19 @@ export default function VentasScreen() {
 
   const sum = state.total; // Asegúrate de que el total esté calculado en tu contexto
 
+const buscarclientes = async () => {
+    try {
+      const lclientes = await drizzleDb.select().from(cliente);
+      setListClientes(
+        lclientes.map((cat: any) => ({
+          idcategoria: String(cat.idCliente),
+          nombrecategoria: cat.nombre,
+        }))
+      );
+    } catch (error) {
+      console.error("Error al obtener categorías:", error);
+    }
+  };
 
 const eliminarItem = (id: string) => {
 
@@ -42,10 +62,9 @@ const eliminarItem = (id: string) => {
   removeItem(id);
 };
 
-const RegistraVenta = async () => {
-  console.log("Registrando venta...");
-
-  try {
+const insertarventa = async(Cliente:number, Vendedor:number) => {
+  console.log("Insertando venta...");
+   try {
     // 1. Insertar en la tabla 'venta' y obtener el ID de la nueva venta.
     const newVentas = await drizzleDb.insert(venta).values({
       fecha: new Date().toISOString(),
@@ -84,19 +103,29 @@ const RegistraVenta = async () => {
     console.error("Error al registrar la venta:", error);
     // Aquí podrías mostrar una alerta de error al usuario.
   }
+} 
+
+const RegistraVenta = () => {
+  console.log("Registrando venta...");
+  insertarventa(1, 1) 
 };
 
-const CrearFactura = () => {
+const CrearFactura = (clienteId?: string) => {
   // Aquí puedes agregar la lógica para crear la factura
-  console.log("Crear factura");
+  if (!clienteId) {
+    console.log("No se seleccionó un cliente para la factura.");
+    return;
+  }
+  console.log("Creando factura para el cliente con ID:", clienteId);
+  insertarventa(Number(clienteId), 1) 
 };
 
 
-  const handleConfirm = () => {
+  const handleConfirm = (clienteId?: string) => {
     if (optboton === 1) {
       RegistraVenta()
     } else {
-      CrearFactura()
+      CrearFactura(clienteId)
     }
 
   }
@@ -142,6 +171,7 @@ const CrearFactura = () => {
           <TouchableOpacity
             style={styles.Boton}
             onPress={() => {
+              buscarclientes();
               setOptboton(2);
               showDialog();
             } }
@@ -155,6 +185,7 @@ const CrearFactura = () => {
           content="¿Estás seguro de que deseas realizar esta acción?"
           confirmText="Confirmar"
           cancelText="Cancelar"
+          listclientes={optboton=== 1 ? [] : [...listClientes]}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
           onDismiss={hideDialog}

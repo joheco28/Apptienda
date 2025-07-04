@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 
   type DropdownItem = {
     data: { idcategoria: string; nombrecategoria: string }[];
-    //data: React.Dispatch<React.SetStateAction<{ idcategoria: string; nombrecategoria: string }[]>>;
+
     handleChange: (name: string, value: string) => void;
   };
 

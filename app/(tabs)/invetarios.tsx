@@ -67,8 +67,7 @@ type listcategorias = {
 const [listcategory, setListcategory] = useState<listcategorias[]>([])
 
   // consulta categorias
-  // const [categorias, setCategorias] = useState([]);
-  // useEffect(() => { 
+
 
   useEffect(() => {
     fetchCategorias();
@@ -83,7 +82,6 @@ const [listcategory, setListcategory] = useState<listcategorias[]>([])
           nombrecategoria: cat.nombre,
         }))
       );
-      console.log("Categorias:", categorias);
     } catch (error) {
       console.error("Error al obtener categorías:", error);
     }
