@@ -29,9 +29,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="invetarios"
+        name="(tabinventario)"
         options={{
           title: 'Inventarios',
+          headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'receipt-sharp' : 'receipt-outline'} color={color} size={24} />
           ),
@@ -50,6 +51,7 @@ export default function TabLayout() {
         name="(tabventas)"
         options={{
           title: 'Ventas',
+          headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'cart-sharp' : 'cart-outline'} color={color} size={24} />
           ),

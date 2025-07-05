@@ -75,9 +75,10 @@ const [listcategory, setListcategory] = useState<listcategorias[]>([])
 
   const fetchCategorias = async () => {
     try {
-      const categorias = await drizzleDb.select().from(categoria);
+      // Especificar el tipo para los resultados de la base de datos mejora la seguridad de tipos.
+      const categorias: { idCategoria: number; nombre: string; descripcion: string | null }[] = await drizzleDb.select().from(categoria);
       setListcategory(
-        categorias.map((cat: any) => ({
+        categorias.map((cat) => ({
           idcategoria: String(cat.idCategoria),
           nombrecategoria: cat.nombre,
         }))
@@ -144,7 +145,7 @@ const [listcategory, setListcategory] = useState<listcategorias[]>([])
   // Manejar cambios en inputs
   const handleChange = (name: string, value: string) => {
     if (
-      (name === "cantidad" || name === "valorUnitario") &&
+      (name === "cantidad" || name === "price") &&
       value !== "" &&
       isNaN(Number(value))
     ) {
@@ -155,7 +156,7 @@ const [listcategory, setListcategory] = useState<listcategorias[]>([])
 
   // Enviar formulario
   const handleSubmit = async () => {
-    if (!form.codigo || !form.nombre || !form.cantidad || !form.price) {
+    if (!form.codigo || !form.nombre || !form.cantidad || !form.price || !form.category) {
       Alert.alert("Error", "Por favor complete todos los campos obligatorios");
       return;
     }
@@ -227,35 +228,33 @@ const [listcategory, setListcategory] = useState<listcategorias[]>([])
     <View style={styles.container}>
       {showScanner ? (
         <View style={styles.scannerContainer}>
-          <CameraView
-            style={StyleSheet.absoluteFillObject}
-            facing={facing}
-            barcodeScannerSettings={{
-              barcodeTypes: ["ean13", "ean8", "upc_a", "code128", "qr"],
-            }}
-            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-          >
-            <View style={styles.scannerOverlay}>
-              <TouchableOpacity
-                style={styles.flipButton}
-                onPress={() =>
-                  setFacing(
-                    facing === ImagePicker.CameraType.back
-                      ? ImagePicker.CameraType.front
-                      : ImagePicker.CameraType.back
-                  )
-                }
-              >
-                <Text style={styles.flipText}>Voltear Cámara</Text>
-              </TouchableOpacity>
-              <View style={styles.scannerFrame} />
-              <Button
-                title="Cancelar"
-                onPress={() => setShowScanner(false)}
-                color="#ff4444"
-              />
-            </View>
-          </CameraView>
+          <CameraView style={StyleSheet.absoluteFillObject}
+            facing={facing} 
+            barcodeScannerSettings={{ 
+              barcodeTypes: ["ean13", "ean8", "upc_a", "code128", "qr"], 
+            }} 
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned} 
+          />
+          <View style={styles.scannerOverlay}>
+            <TouchableOpacity
+              style={styles.flipButton}
+              onPress={() =>
+                setFacing(
+                  facing === ImagePicker.CameraType.back
+                    ? ImagePicker.CameraType.front
+                    : ImagePicker.CameraType.back
+                )
+              }
+            >
+              <Text style={styles.flipText}>Voltear Cámara</Text>
+            </TouchableOpacity>
+            <View style={styles.scannerFrame} />
+            <Button
+              title="Cancelar"
+              onPress={() => setShowScanner(false)}
+              color="#ff4444"
+            />
+          </View>
         </View>
       ) : (
         <>
