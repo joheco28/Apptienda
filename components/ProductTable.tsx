@@ -45,8 +45,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
   onProductChange 
 }) => {
 
- console.log('Initial products:', initialProducts);
-
   const [products, setProducts] = useState<Product[]>(
     initialProducts.map(product => ({      ...product,
       descripcion: product.descripcion || '', // Asegurar que descripcion no sea null
@@ -61,8 +59,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
       })));
     }
   }, [initialProducts]);
-
-console.log('Products state:', products);
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);

@@ -6,13 +6,15 @@ export default function Index() {
     <View style={styles.container}>
       <Text style={styles.titulo}>AppTienda</Text>
       <Image
-        source={require('../../assets/images/tienda.png')}
+        source={require('@/assets/images/tienda.png')}
         style={styles.image} 
       />
       <Text style={styles.text}>Welcome to the home screen!</Text>
-      <Link href="/about" style={styles.button}>
-        Acerca de la aplicación
+
+      <Link href="/" style={styles.button}>
+        ver resumen de ventas
       </Link>
+
     </View>
   );
 }
