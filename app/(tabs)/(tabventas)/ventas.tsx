@@ -69,7 +69,7 @@ const insertarventa = async(Cliente:number, Vendedor:number) => {
     const newVentas = await drizzleDb.insert(venta).values({
       fecha: new Date().toISOString(),
       total: sum,
-      idCliente: 1, 
+      idCliente: Cliente, 
       idVendedor: 1, 
     }).returning({ idVenta: venta.idVenta });
 
@@ -105,9 +105,9 @@ const insertarventa = async(Cliente:number, Vendedor:number) => {
   }
 } 
 
-const RegistraVenta = () => {
+const RegistraVenta = (idc: number) => {
   console.log("Registrando venta...");
-  insertarventa(1, 1) 
+  insertarventa(idc, 1) 
 };
 
 const CrearFactura = (clienteId?: string) => {
@@ -123,7 +123,7 @@ const CrearFactura = (clienteId?: string) => {
 
   const handleConfirm = (clienteId?: string) => {
     if (optboton === 1) {
-      RegistraVenta()
+      RegistraVenta(Number(clienteId))
     } else {
       CrearFactura(clienteId)
     }

@@ -10,10 +10,11 @@ export default function homeLayout() {
         headerTintColor: "#fff",
         headerTitleAlign: "center",
         headerShadowVisible: false,
+        animation: "fade",
         }}
     >
       <Stack.Screen
-        name="index"
+        name="home"
         options={{
           title: "Home",
           headerShown: false,
@@ -23,6 +24,12 @@ export default function homeLayout() {
         name="ResumenVentas"
         options={{
           title: "Resumen de ventas",
+        }}
+      />
+      <Stack.Screen
+        name="Vendedores"
+        options={{
+          title: "Registrar Vendedores",
         }}
       />
     </Stack>

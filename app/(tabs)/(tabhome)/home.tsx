@@ -15,6 +15,10 @@ export default function Index() {
         ver resumen de ventas
       </Link>
 
+      <Link href="/(tabs)/(tabhome)/Vendedores" style={styles.button}>
+        Registro de Vendedores
+      </Link>
+
     </View>
   );
 }

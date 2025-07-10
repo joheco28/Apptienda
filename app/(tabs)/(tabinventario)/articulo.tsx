@@ -8,7 +8,7 @@ import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import { producto, categoria } from "@/database/schemas/tiendaSchema";
 import { useFocusEffect } from "expo-router";
-import { eq } from "drizzle-orm";
+
 
 
 
