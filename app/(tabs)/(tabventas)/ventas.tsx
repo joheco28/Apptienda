@@ -63,7 +63,7 @@ const eliminarItem = (id: string) => {
 };
 
 const insertarventa = async(Cliente:number, Vendedor:number) => {
-  console.log("Insertando venta...");
+
    try {
     // 1. Insertar en la tabla 'venta' y obtener el ID de la nueva venta.
     const newVentas = await drizzleDb.insert(venta).values({
@@ -80,7 +80,7 @@ const insertarventa = async(Cliente:number, Vendedor:number) => {
     }
 
     const ventaId = newVentas[0].idVenta;
-    console.log("Venta registrada exitosamente con ID:", ventaId);
+
 
     // 2. Insertar cada item del carrito en la tabla 'detalleVenta'.
   
@@ -97,7 +97,6 @@ const insertarventa = async(Cliente:number, Vendedor:number) => {
       });
     }));
 
-    console.log("Detalles de la venta registrados exitosamente.");
     clearCart(); // Limpiar el carrito después de registrar la venta.
   } catch (error) {
     console.error("Error al registrar la venta:", error);
@@ -107,6 +106,7 @@ const insertarventa = async(Cliente:number, Vendedor:number) => {
 
 const RegistraVenta = (idc: number) => {
   console.log("Registrando venta...");
+  console.log("ID del cliente:", idc);
   insertarventa(idc, 1) 
 };
 
@@ -123,8 +123,10 @@ const CrearFactura = (clienteId?: string) => {
 
   const handleConfirm = (clienteId?: string) => {
     if (optboton === 1) {
+      console.log("Confirmar registro de venta");
       RegistraVenta(Number(clienteId))
     } else {
+      console.log("Confirmar creación de factura");
       CrearFactura(clienteId)
     }
 

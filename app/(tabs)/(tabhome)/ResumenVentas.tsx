@@ -68,10 +68,9 @@ const loadVentas2 = async () => {
         .from(venta)
         .innerJoin(cliente, eq(venta.idCliente, cliente.idCliente))
         .innerJoin(vendedor, eq(venta.idVendedor, vendedor.idVendedor));
-        console.log('Ventas cargadas desde la base de datos:', ventas);
       setSales(ventas.map((v: any) => ({
         idventa: v.idventa,
-        fecha: v.fecha,
+        fecha: formatDate(v.fecha),
         nombreCliente: v.nombreCliente,
         nombreVendedor: v.nombreVendedor,
         total: v.total,
@@ -90,10 +89,6 @@ const loadVentas2 = async () => {
         }, [])
   );
   
-console.log('Ventas cargadas:', ventasData);
-
- 
-
 
   const salesDataFinal = sales.length > 0 ? sales : [];
 
@@ -138,7 +133,7 @@ console.log('Ventas cargadas:', ventasData);
           onPress={() => setShowDateFilter(!showDateFilter)}
         >
           <Text style={styles.filterButtonText}>
-            {selectedDate ? `Filtrado por: ${formatDate(selectedDate)}` : 'Filtrar por fecha'}
+            {selectedDate ? `Filtrado por: ${selectedDate}` : 'Filtrar por fecha'}
           </Text>
         </TouchableOpacity>
         
@@ -175,7 +170,7 @@ console.log('Ventas cargadas:', ventasData);
               <View key={sale.idventa} style={styles.tableRow}>
                 <Text style={[styles.cell, styles.idColumn]}>{sale.idventa}</Text>
                 <Text style={[styles.cell, styles.dateColumn]}>
-                  {formatDate(sale.fecha)}
+                  {sale.fecha}
                 </Text>
                 <Text style={[styles.cell, styles.clientColumn]}>
                   {sale.nombreCliente}

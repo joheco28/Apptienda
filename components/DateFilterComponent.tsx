@@ -47,19 +47,24 @@ const DateFilterComponent: React.FC<DateFilterComponentProps> = ({
     return calendar;
   };
 
-  const formatDateForComparison = (year: number, month: number, day: number): string => {
+  const formatDateForComparison = (day: number, month: number,year: number): string => {
     const date = new Date(year, month, day);
-    return date.toISOString().split('T')[0];
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'numeric',
+      day: '2-digit',
+    });
   };
 
   const isDateAvailable = (day: number): boolean => {
-    const dateString = formatDateForComparison(selectedYear, selectedMonth, day);
+    const dateString = formatDateForComparison(day, selectedMonth, selectedYear);
     return uniqueDates.includes(dateString);
   };
 
   const handleDatePress = (day: number) => {
+
     if (isDateAvailable(day)) {
-      const dateString = formatDateForComparison(selectedYear, selectedMonth, day);
+      const dateString = formatDateForComparison(day, selectedMonth, selectedYear);
       onDateSelect(dateString);
     }
   };
@@ -145,8 +150,8 @@ const DateFilterComponent: React.FC<DateFilterComponentProps> = ({
                     day && isDateAvailable(day) ? styles.availableDay : null,
                     !day ? styles.emptyDay : null,
                   ]}
-                  onPress={() => day && handleDatePress(day)}
-                  disabled={!day || !isDateAvailable(day)}
+                  onPress={() =>day && handleDatePress(day)}
+
                 >
                   <Text
                     style={[
@@ -174,7 +179,7 @@ const DateFilterComponent: React.FC<DateFilterComponentProps> = ({
                     onPress={() => onDateSelect(date)}
                   >
                     <Text style={styles.availableDateChipText}>
-                      {new Date(date).toLocaleDateString('es-ES')}
+                      {date}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -282,11 +287,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   availableDayText: {
-    color: 'white',
+    color: 'black',
     fontWeight: '600',
   },
   unavailableDayText: {
-    color: '#ccc',
+    color: 'red',
   },
   availableDatesContainer: {
     marginTop: 20,

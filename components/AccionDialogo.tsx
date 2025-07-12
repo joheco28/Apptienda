@@ -77,7 +77,7 @@ const [idcliente, setidcliente] = React.useState("0");
                   }
                 onConfirm(idcliente);
                 } else {
-                  onConfirm("0");
+                  onConfirm("10");
                 }
                 setidcliente("0");
                 onDismiss()
