@@ -37,7 +37,7 @@ interface FormData {
 
 interface ProductTableProps {
   initialProducts?: Product[];
-  onProductChange?: (products: Product[]) => void;
+  onProductChange?: (products: Product) => void;
 }
 
 const ProductTable: React.FC<ProductTableProps> = ({ 
@@ -74,7 +74,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
 
   const updateProducts = (newProducts: Product[]): void => {
     setProducts(newProducts);
-    onProductChange?.(newProducts);
+    
   };
 
 
@@ -121,6 +121,18 @@ const ProductTable: React.FC<ProductTableProps> = ({
 
     if (editingProduct) {
       // Editar producto existente
+      console.log('Editando producto con datos:', formData);
+      const updatedProduct: Product = {
+        ...editingProduct,
+        codigo: formData.codigo.trim(),
+        nombre: formData.nombre.trim(),
+        imagen: formData.imagen.trim() || 'https://via.placeholder.com/50',
+        descripcion: formData.descripcion.trim(),
+        precio: parseFloat(formData.precio),
+        cantidad: parseInt(formData.cantidad),
+        idcategoria: parseInt(formData.idcategoria),
+      };
+      onProductChange?.(updatedProduct);
       const updatedProducts = products.map(p => 
         p.idProducto === editingProduct.idProducto
           ? {

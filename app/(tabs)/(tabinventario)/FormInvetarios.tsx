@@ -84,7 +84,8 @@ const [listcategory, setListcategory] = useState<listcategorias[]>([])
         }))
       );
     } catch (error) {
-      console.error("Error al obtener categorías:", error);
+      
+      Alert.alert("Error", "No se pudieron cargar las categorías");
     }
   };
 
@@ -176,9 +177,7 @@ const [listcategory, setListcategory] = useState<listcategorias[]>([])
         idCategoria: parseInt(form.category), // Asignar una categoría por defecto o manejarlo dinámicamente
       })
       .run();
-    // Mostrar datos guardados en consola
 
-    console.log("Datos guardados:", form);
 
     // Limpiar formulario
     setForm({

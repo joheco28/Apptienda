@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import ProductCard from "../components/productCard";
 import {useCart} from "@/contexto/carritoContext";
@@ -49,7 +50,8 @@ export default function ProductListScreen() {
         .leftJoin(categoria, eq(categoria.idCategoria, producto.idCategoria));
       setProducts(productos);
     } catch (error) {
-      console.error("Error al cargar los clientes:", error);
+      
+      Alert.alert("Error", "al cargar los clientes");
     }
   };
 
@@ -104,7 +106,7 @@ export default function ProductListScreen() {
   }
 
   const handleAddToCart: HandleAddToCart = (product) => {
-    console.log("Added to cart:", product.name);
+    
     addItem({id: product.id, producto: product.name, cantidad: 1, precio: product.price});
   };
 

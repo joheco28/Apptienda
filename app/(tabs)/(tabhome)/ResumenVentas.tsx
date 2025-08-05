@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import DateFilterComponent from '@/components/DateFilterComponent';
 
@@ -49,7 +50,8 @@ const loadVentas2 = async () => {
         .from(venta)
       console.log('Ventas cargadas desde la base de datos:', ventas2);
     } catch (error) {
-      console.error("Error al cargar las ventas:", error);
+      
+      Alert.alert("Error", "No se pudieron cargar las ventas.");
     }
   }
 
@@ -77,7 +79,8 @@ const loadVentas2 = async () => {
       })));
       //return ventas as Sale[];
     } catch (error) {
-      console.error("Error al cargar las ventas:", error);
+      
+      Alert.alert("Error", "No se pudieron cargar las ventas.");
       return [];
     } 
   }

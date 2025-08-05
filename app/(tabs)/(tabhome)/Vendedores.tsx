@@ -66,7 +66,8 @@ const VendedoresManager = () => {
       })))  
 
     } catch (error) {
-      console.error("Error al cargar los vendedores:", error)
+      
+      Alert.alert("Error", "No se pudieron cargar los vendedores.");
     }
   }
 
@@ -84,7 +85,8 @@ const VendedoresManager = () => {
 
       loadVendedores()
     } catch (error) {
-      console.error("Error al actualizar el vendedor:", error)
+      
+      Alert.alert("Error", "No se pudo actualizar el vendedor.");
     }
   }
 
@@ -100,7 +102,8 @@ const VendedoresManager = () => {
       })
       loadVendedores()
     } catch (error) {
-      console.error("Error al crear el vendedor:", error)
+      
+      Alert.alert("Error", "No se pudo crear el vendedor.");
     }
   } 
 

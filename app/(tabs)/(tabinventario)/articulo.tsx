@@ -1,11 +1,12 @@
 import ProductTable from "@/components/ProductTable";
 import { Link } from "expo-router";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Alert } from "react-native";
 import { Button } from "react-native-paper";
 import { useCallback, useState } from "react";
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
+import { eq } from "drizzle-orm";
 import { producto, categoria } from "@/database/schemas/tiendaSchema";
 import { useFocusEffect } from "expo-router";
 
@@ -55,7 +56,8 @@ export default function ArticuloLayout() {
 
       setProducts(productosFixed as products[]);
     } catch (error) {
-      console.error("Error al cargar los clientes:", error);
+      
+      Alert.alert("Error", "No se pudieron cargar los clientes");
     }
   };
 
@@ -65,10 +67,21 @@ export default function ArticuloLayout() {
     }, [])
   );
 
+  const actualizaProducto = async(data: products) => {
+    // Actualiza el producto en la lista
+    await drizzleDb
+      .update(producto)
+      .set({
+        price: data.precio,
+        cantidad: data.cantidad,})
+      .where(eq(producto.idProducto, data.idProducto));
+  };
+
+
   return (
     <View style={styles.container}>
-      <ProductTable initialProducts={products} />
-      <Link href="/FormInvetarios">
+      <ProductTable initialProducts={products} onProductChange={actualizaProducto} />
+      <Link href="/(tabs)/(tabinventario)/FormInvetarios" asChild>
         <Button style={styles.button}>
           <Text style={styles.buttonText}>Registrar Articulo Nuevo</Text>
         </Button>

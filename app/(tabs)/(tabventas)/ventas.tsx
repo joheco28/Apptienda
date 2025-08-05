@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import TablaCarrito from "@/components/TablaCarrito";
 import AccionDialogo from "@/components/AccionDialogo";
 import { PaperProvider } from "react-native-paper";
@@ -51,15 +51,27 @@ const buscarclientes = async () => {
         }))
       );
     } catch (error) {
-      console.error("Error al obtener categorías:", error);
+      
+      Alert.alert("Error", "No se pudieron cargar los clientes.");
     }
   };
 
 const eliminarItem = (id: string) => {
 
-  console.log("Eliminar item con ID:",id);
-  // Aquí puedes agregar la lógica para eliminar el item del carrito
-  removeItem(id);
+  Alert.alert("Confirmar eliminación", "¿Estás seguro de que deseas eliminar este item?", [
+    {
+      text: "Cancelar",
+      style: "cancel",
+    },
+    {
+      text: "Eliminar",
+      style: "destructive",
+      onPress: () => {
+        removeItem(id);
+      },
+    },
+  ]);
+
 };
 
 const insertarventa = async(Cliente:number, Vendedor:number) => {
@@ -74,7 +86,8 @@ const insertarventa = async(Cliente:number, Vendedor:number) => {
     }).returning({ idVenta: venta.idVenta });
 
     if (!newVentas || newVentas.length === 0) {
-      console.error("Error: No se pudo registrar la venta y obtener el ID.");
+      
+      Alert.alert("Error", "No se pudo registrar la venta y obtener el ID.");
       // Aquí podrías mostrar una alerta al usuario.
       return;
     }
@@ -85,7 +98,7 @@ const insertarventa = async(Cliente:number, Vendedor:number) => {
     // 2. Insertar cada item del carrito en la tabla 'detalleVenta'.
   
     await Promise.all(data.map(item => {
-      // Aseguramos que el id del producto sea un número, ya que puede venir como string.
+      
       const productId = typeof item.id === 'string' ? parseInt(item.id, 10) : item.id;
 
       return drizzleDb.insert(detalleVenta).values({
@@ -99,34 +112,36 @@ const insertarventa = async(Cliente:number, Vendedor:number) => {
 
     clearCart(); // Limpiar el carrito después de registrar la venta.
   } catch (error) {
-    console.error("Error al registrar la venta:", error);
+    
+    Alert.alert("Error", "No se pudo registrar la venta. {error}");
     // Aquí podrías mostrar una alerta de error al usuario.
   }
 } 
 
 const RegistraVenta = (idc: number) => {
-  console.log("Registrando venta...");
-  console.log("ID del cliente:", idc);
+
   insertarventa(idc, 1) 
 };
 
 const CrearFactura = (clienteId?: string) => {
-  // Aquí puedes agregar la lógica para crear la factura
+  
   if (!clienteId) {
-    console.log("No se seleccionó un cliente para la factura.");
+    
+    Alert.alert("Error", "No se seleccionó un cliente para la factura.");
     return;
   }
-  console.log("Creando factura para el cliente con ID:", clienteId);
-  insertarventa(Number(clienteId), 1) 
+    insertarventa(Number(clienteId), 1) 
+    // console.log("Creando factura para el cliente con ID:", clienteId);
+    Alert.alert("Factura creada", `Factura creada para el cliente con ID: ${clienteId}`);
 };
 
 
   const handleConfirm = (clienteId?: string) => {
     if (optboton === 1) {
-      console.log("Confirmar registro de venta");
+      
       RegistraVenta(Number(clienteId))
     } else {
-      console.log("Confirmar creación de factura");
+      
       CrearFactura(clienteId)
     }
 

@@ -57,7 +57,8 @@ export default function RegistrationForm() {
       const clientes = await drizzleDb.select().from(cliente);
       setListClientes(clientes);
     } catch (error) {
-      console.error("Error al cargar los clientes:", error);
+      
+      Alert.alert("Error", "No se pudieron cargar los clientes");
     }
   };
  
@@ -172,7 +173,7 @@ export default function RegistrationForm() {
             Alert.alert("Éxito", "Datos actualizados correctamente")
           })
           .catch((error) => {
-            console.error("Error al actualizar los datos:", error)
+            
             Alert.alert("Error", "No se pudieron actualizar los datos")
           })
           setShowBoton("Enviar");
