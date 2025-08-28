@@ -10,7 +10,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import ProductCard from "../components/productCard";
+import ProductCard from "@/components/productCard";
 import {useCart} from "@/contexto/carritoContext";
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
@@ -18,10 +18,12 @@ import { useSQLiteContext } from "expo-sqlite";
 import { producto, categoria } from "@/database/schemas/tiendaSchema";
 import { useFocusEffect } from "expo-router";
 import { eq } from "drizzle-orm";
+import BarcodeScannerCamera from "@/components/BarcodeScannerCamera"
 
 export default function ProductListScreen() {
   type products = {
     id: number;
+    codigo: string;
     name: string;
     price: number;
     image: string | null;
@@ -30,6 +32,8 @@ export default function ProductListScreen() {
 
   const { state, addItem } = useCart();
   const [products, setProducts] = useState<products[]>([]);
+  const [showscaner, setShowScaner] = useState(false);
+
 
   // cargando base de datos
   const db = useSQLiteContext();
@@ -41,6 +45,7 @@ export default function ProductListScreen() {
       const productos = await drizzleDb
         .select({
           id: producto.idProducto,
+          codigo: producto.codigo,
           name: producto.nombre,
           price: producto.price,
           image: producto.image,
@@ -61,36 +66,42 @@ export default function ProductListScreen() {
     }, [])
   );
 
-  // State to manage products and filtering
+ 
 
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // Extract unique categories from products
+  
   const categories = [
-    "All",
+    "Scanner","All",
     ...new Set(products.map((product) => product.category)),
   ];
 
-  // Filter products when category changes
+  
   useEffect(() => {
-    if (selectedCategory === "All") {
-      setFilteredProducts(products);
-    } else {
-      setFilteredProducts(
-        products.filter(
-          (product) => String(product.category) === selectedCategory
-        )
-      );
-    }
+      if (selectedCategory === "All") {
+        setFilteredProducts(products);
+      } else {
+        setFilteredProducts(
+          products.filter(
+            (product) => String(product.category) === selectedCategory
+          )
+        );
+      }     
   }, [selectedCategory, products]);
+
 
   interface CategoryPressHandler {
     (category: string): void;
   }
 
   const handleCategoryPress: CategoryPressHandler = (category) => {
-    setSelectedCategory(category);
+    if (category === "Scanner") {
+      Alert.alert("Utilizando el scanner");
+       setShowScaner(true);
+    } else {
+      setSelectedCategory(category);
+    }
   };
 
   interface Product {
@@ -137,10 +148,23 @@ export default function ProductListScreen() {
             </Text>
           </TouchableOpacity>
         ))}
+
+        
+
       </ScrollView>
 
-      {/* Products List */}
-      <FlatList
+      {showscaner ? (
+        <BarcodeScannerCamera
+          onScannedValue={(value, type) => {
+            Alert.alert("Código escaneado", `Tipo: ${type}\nValor: ${value}`);
+            setFilteredProducts(products.filter((product) => product.codigo === value)
+      );
+            setShowScaner(false);
+          }}
+          allowedTypes={["ean13", "code128"]}
+        />
+      ) : (
+         <FlatList
         data={filteredProducts}
         keyExtractor={(item) => String(item.id)}
         numColumns={2}
@@ -162,6 +186,10 @@ export default function ProductListScreen() {
         )}
         contentContainerStyle={styles.productList}
       />
+      )}
+
+      {/* Products List */}
+     
     </SafeAreaView>
   );
 }
